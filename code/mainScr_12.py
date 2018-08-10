@@ -48,25 +48,49 @@ def get_info(url):
             exceptinfo = bsObj.select('table[class="score_table"]')[i].select('td')[1].get_text()#异常信息记录页
             badblock = bsObj.select('table[class="score_table"]')[i].select('td')[3].get_text()#坏块比例
             liferate = bsObj.select('table[class="score_table"]')[i].select('td')[5].get_text()#寿命比例
-            info +=exceptinfo+" "+badblock+" "+liferate+"\r\n"
+            info +=exceptinfo+" "+badblock+" "+liferate+""+"0"+" "+"0"+" "+"0"+"\r\n"
         f.write("%s"%(info))
         print("正在写入第"+str(i)+"条信息")
     print("写入文件成功！")
 
+    #将txt文件存入数据库
+    input = open('info2.txt')
+    db = pymysql.connect('localhost','root','123','huawei')
+    cur=db.cursor()
+    for line in input.readlines():
+        linelist = line.split(' ')
+        sql ="INSERT INTO disk" \
+                     "(daname,caowei,disktype,hardtype,sequence,score,errorevent,readerr,writeerr,checkerr,reflect,errchannel)" \
+                     "VALUES" \
+                     "('"+linelist[0]+"','"+linelist[1]+"','"+linelist[2]+"','"+linelist[3]+"','"+linelist[4]+"','"+linelist[5]\
+                    +"','"+linelist[6]+"','"+linelist[7]+"','"+linelist[8]+"','"+linelist[9]+"','"+linelist[10]+"','"+linelist[11]+"')"
+        cur.execute(sql)
+        db.commit()
+    print("信息插入数据库成功！")
+    #去除数据库中的重复信息
+    # sql1 = "create table temp as (select distinct daname,caowei,disktype,hardtype,sequence,score,errorevent,readerr,writeerr,checkerr,reflect,errchannel from disk)"
+    # cur.execute(sql1)
+    # sql2 = "delete from disk;"
+    # cur.execute(sql2)
+    # sql3 = "insert into disk select * from temp"
+    # cur.execute(sql3)
+    # db.commit()
+    # print("已将重复信息去除")
+
 #读取目录下的文件列表
-sPath4File="/home/xia/python/myproject"
-lsFileList=os.listdir(sPath4File)
-today = dt.datetime.today()
-oneday=dt.timedelta(days=0)
-yesterday=today-oneday
-# #文件名格式为空格+V
-format=' V'
-yes=yesterday.strftime(format)
-for sFileName in lsFileList:
-    if str.find(sFileName,yes ) >= 0:
-        sPathFileName=sPath4File+"/"+sFileName
-        print("开始读取文件")
-        print(sPathFileName)
-        get_info(sPathFileName)
-# get_info('/home/xia/python/myproject/2102350HYS10J30000205500 V31533537279000.html')
+# sPath4File="/home/xia/python/myproject"
+# lsFileList=os.listdir(sPath4File)
+# today = dt.datetime.today()
+# oneday=dt.timedelta(days=0)
+# yesterday=today-oneday
+# # #文件名格式为空格+V
+# format=' V'
+# yes=yesterday.strftime(format)
+# for sFileName in lsFileList:
+#     if str.find(sFileName,yes ) >= 0:
+#         sPathFileName=sPath4File+"/"+sFileName
+#         print("开始读取文件")
+#         print(sPathFileName)
+#         get_info(sPathFileName)
+get_info('/home/xia/python/myproject/diskDataCollection/2102350FJF10J300001518500 V31533631265000.html')
 # get_info('/home/xia/python/myproject/2102350FJF10J300001518500 V31533631265000.html')
